@@ -4,6 +4,7 @@ import { insertLineItems } from "../services/lineItemService.js";
 import { queue } from "../queue.js";
 import { getStoreByDomain } from "../services/storeService.js";
 import { closeOpenSessionsForPhone } from "../services/conversationService.js";
+import {orderStatusTypes} from "../utils/supabaseClient.js";
 
 export async function handleShopifyWebhook(req, res) {
 
@@ -19,7 +20,7 @@ export async function handleShopifyWebhook(req, res) {
     }
     
     // Fechar sessões abertas para o telefone do pedido (se houver)
-    await closeOpenSessionsForPhone({ store_id: store.id, phone: "48732081430" /*payload.default_address?.phone || payload.phone*/ });
+    await closeOpenSessionsForPhone({ store_id: store.id, phone: payload.default_address?.phone || payload.phone });
 
     logger.info(`📩 Webhook Shopify: shop=${store.name} topic=${topic}`);
 
@@ -28,7 +29,7 @@ export async function handleShopifyWebhook(req, res) {
         switch (topic) {
             case "orders/create":
                 var order = await upsertOrder(payload, store.id);
-                await updateOrder(order.id, { customer_phone: "48732081430" });
+                //await updateOrder(order.id, { customer_phone: "48732081430" });
                 await insertLineItems(order.id, payload.line_items);
 
                 logger.info(`✅ Pedido criado/atualizado: ${payload.id}`);
