@@ -1,20 +1,9 @@
-// src/controllers/zapiWebhookController.js
 import logger from "../utils/logger.js";
 import { getOrderByPhone } from "../services/orderService.js";
 import { getStoreById } from "../services/storeService.js";
-import { orderStatusTypes } from "../utils/supabaseClient.js";
 import { queue } from "../queue.js";
-
 import { loadOrCreateSession, saveSession, logEvent } from "../services/conversationService.js";
 import { reduce, States, Intents } from "../dialog/engine.js";
-
-/**
- * Regras rápidas de intenção (baixa latência).
- * Observação:
- * - Mantemos 1,2,3 como atalhos.
- * - "voltar", "errei", "errei de novo" => GO_BACK (ou volta a pedir endereço).
- */
-
 
 
 function parseIntentNumbersOnly(text, state) {
@@ -64,6 +53,7 @@ export async function handleZapiWebhook(req, res) {
         }
         const store = await getStoreById(order.store_id);
         const cc = store.country_code;
+
 
         // 2) Carregar/abrir sessão de conversa
         const session = await loadOrCreateSession({

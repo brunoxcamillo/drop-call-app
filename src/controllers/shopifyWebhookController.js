@@ -1,29 +1,34 @@
 import logger from "../utils/logger.js";
 import { getOrderByShopifyId, updateOrder, upsertOrder } from "../services/orderService.js";
 import { insertLineItems } from "../services/lineItemService.js";
-import { sendWhatsAppConfirmation } from "../services/zapiService.js";
 import { queue } from "../queue.js";
+import { getStoreByDomain } from "../services/storeService.js";
+import { closeOpenSessionsForPhone } from "../services/conversationService.js";
 
 export async function handleShopifyWebhook(req, res) {
 
     const shopDomain = req.get("x-shopify-shop-domain");
     const topic = req.get("x-shopify-topic");
     const payload = req.body;
-    const store = req.store;
+
+    const store = await getStoreByDomain(shopDomain);
+    
+    if (!store) {
+        logger.info(`Loja não encontrada: ${shopDomain}`);
+        return res.status(200).send("Loja não encontrada");
+    }
+    
+    // Fechar sessões abertas para o telefone do pedido (se houver)
+    await closeOpenSessionsForPhone({ store_id: store.id, phone: "48732081430" /*payload.default_address?.phone || payload.phone*/ });
 
     logger.info(`📩 Webhook Shopify: shop=${store.name} topic=${topic}`);
 
     try {
-        // 1️⃣ Verificar loja
-        if (!store) {
-            logger.info(`Loja não encontrada: ${shopDomain}`);
-            return res.status(200).send("Loja não encontrada");
-        }
 
         switch (topic) {
             case "orders/create":
                 var order = await upsertOrder(payload, store.id);
-                await updateOrder(order.id,{customer_phone: "48732081430"});
+                await updateOrder(order.id, { customer_phone: "48732081430" });
                 await insertLineItems(order.id, payload.line_items);
 
                 logger.info(`✅ Pedido criado/atualizado: ${payload.id}`);
@@ -38,7 +43,7 @@ export async function handleShopifyWebhook(req, res) {
             case "orders/cancelled":
                 // TODO
                 var order = await getOrderByShopifyId(payload.id, store.id);
-                if(order) {
+                if (order) {
                     await updateOrder(order.id, { status: orderStatusTypes.canceled });
                 }
 
