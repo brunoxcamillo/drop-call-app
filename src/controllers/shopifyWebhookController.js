@@ -1,3 +1,4 @@
+//shopifyWebhookController.js
 import logger from "../utils/logger.js";
 import { getOrderByShopifyId, updateOrder, upsertOrder } from "../services/orderService.js";
 import { insertLineItems } from "../services/lineItemService.js";
@@ -20,7 +21,7 @@ export async function handleShopifyWebhook(req, res) {
     }
     
     // Fechar sessões abertas para o telefone do pedido (se houver)
-    await closeOpenSessionsForPhone({ store_id: store.id, phone: payload.default_address?.phone || payload.phone });
+    await closeOpenSessionsForPhone({ store_id: store.id, phone: "48732081430"/*payload.default_address?.phone || payload.phone*/ });
 
     logger.info(`📩 Webhook Shopify: shop=${store.name} topic=${topic}`);
 
@@ -29,7 +30,7 @@ export async function handleShopifyWebhook(req, res) {
         switch (topic) {
             case "orders/create":
                 var order = await upsertOrder(payload, store.id);
-                //await updateOrder(order.id, { customer_phone: "48732081430" });
+                await updateOrder(order.id, { customer_phone: "48732081430" });
                 await insertLineItems(order.id, payload.line_items);
 
                 logger.info(`✅ Pedido criado/atualizado: ${payload.id}`);

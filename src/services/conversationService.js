@@ -74,27 +74,27 @@ export async function closeSession(id) {
 
 
 export async function closeOpenSessionsForPhone({ store_id, phone }) {
-  const { error } = await supabase
-    .from("conversations")
-    .update({ is_closed: true, updated_at: new Date().toISOString() })
-    .eq("store_id", store_id)
-    .eq("phone", phone)
-    .eq("is_closed", false);
-  if (error) throw error;
+    const { error } = await supabase
+        .from("conversations")
+        .update({ is_closed: true, updated_at: new Date().toISOString() })
+        .eq("store_id", store_id)
+        .eq("phone", phone)
+        .eq("is_closed", false);
+    if (error) throw error;
 }
 
 export async function openNewSessionForOrder({ store_id, phone, order_id, locale = "pt" }) {
-  const { data, error } = await supabase
-    .from("conversations")
-    .insert([{
-      store_id, phone, order_id,
-      state: "start", context: {}, history: [],
-      locale, is_closed: false
-    }])
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+    const { data, error } = await supabase
+        .from("conversations")
+        .insert([{
+            store_id, phone, order_id,
+            state: "start", context: {}, history: [],
+            locale, is_closed: false
+        }])
+        .select()
+        .single();
+    if (error) throw error;
+    return data;
 }
 
 export async function logEvent(conversation_id, evt) {

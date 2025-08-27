@@ -58,6 +58,7 @@ export const queue = new Queue("main", {
 const worker = new Worker(
     "main",
     async (job) => {
+        console.log("⚙️ worker carregado!");
         const { type, payload } = job.data;
 
         // 1) Envio da confirmação inicial (mantido)
@@ -99,27 +100,6 @@ const worker = new Worker(
                 await updateOrder(order.id, { status: orderStatusTypes.address_change });
             }
 
-            return { ok: true };
-        }
-
-        // ======== Legado (mantido por compatibilidade) ========
-        if (type === "classify_message") {
-            logger.warn("Deprecated: 'classify_message' – fluxo agora é FSM. Ignorando.");
-            return { ok: true };
-        }
-
-        if (type === "address_change") {
-            // No novo fluxo, quem pede/revisa endereço é o FSM.
-            // Mantemos resposta curta para não quebrar jobs antigos.
-            const order = await getOrderById(payload.orderId);
-            await sendWhatsAppMessageByType(
-                order.customer_phone,
-                messageTypes.on_change_address_response,
-                payload.cc
-            );
-            logger.info(
-                `📦 Confirmação de endereço recebida (legado) para pedido: ${order.shopify_id}`
-            );
             return { ok: true };
         }
 

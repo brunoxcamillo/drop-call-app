@@ -1,7 +1,5 @@
-import express from 'express';
 import dotenv from 'dotenv';
 import app from './app.js'; // Import the app from app.js
-import { extractAndValidateAddress } from './utils/addressValidator.js';
 
 dotenv.config();
 
