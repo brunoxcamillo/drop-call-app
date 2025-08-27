@@ -93,18 +93,13 @@ const worker = new Worker(
 
             // 3) Efeitos colaterais finais (status do pedido) após envio OK
             if (context?.order_status === "confirmed") {
-                await updateOrder(order.id, { status: orderStatusTypes.confirmed });
-                if(process.env.TEST !== "1"){
-                    await syncShopifyOrderTags({ order_id: order.id, store_id: store.id });
-                }
+                await updateOrder(order.id, { status: orderStatusTypes.confirmed }); 
+                await syncShopifyOrderTags({ order_id: order.id, store_id: store.id });                
             } else if (context?.order_status === "canceled") {
-                await updateOrder(order.id, { status: orderStatusTypes.canceled });
-                
+                await updateOrder(order.id, { status: orderStatusTypes.canceled });                
             } else if (context?.order_status === "address_change") {
                 await updateOrder(order.id, { status: orderStatusTypes.address_change });
-                if(process.env.TEST !== "1"){
-                    await syncShopifyOrderTags({ order_id: order.id, store_id: store.id });
-                }
+                await syncShopifyOrderTags({ order_id: order.id, store_id: store.id });
             }
 
             return { ok: true };
@@ -155,3 +150,4 @@ async function shutdown(name, code) {
 
 process.on("SIGTERM", () => shutdown("SIGTERM", 0));
 process.on("SIGINT", () => shutdown("SIGINT", 0));
+
