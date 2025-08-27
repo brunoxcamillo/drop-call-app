@@ -20,10 +20,6 @@ export async function handleShopifyWebhook(req, res) {
         logger.info(`Loja não encontrada: ${shopDomain}`);
         return res.status(200).send("Loja não encontrada");
     }
-    if (process.env.TEST == "1") {
-        // Fechar sessões abertas para o telefone do pedido (se houver)
-        await closeOpenSessionsForPhone({ store_id: store.id, phone: "48732081430"/*payload.default_address?.phone || payload.phone*/ });
-    }
 
     logger.info(`📩 Webhook Shopify: shop=${store.name} topic=${topic}`);
 
@@ -34,10 +30,6 @@ export async function handleShopifyWebhook(req, res) {
                 var order = await upsertOrder(payload, store.id);
                 // Fechar sessões abertas para o telefone do pedido (se houver)
                 await closeOpenSessionsForPhone({ store_id: store.id, phone: order.customer_phone });
-
-                if (process.env.TEST == "1") {
-                    await updateOrder(order.id, { customer_phone: "48732081430" });
-                }
                 
                 await insertLineItems(order.id, payload.line_items);
 
@@ -70,5 +62,6 @@ export async function handleShopifyWebhook(req, res) {
         res.status(500).send("error");
     }
 }
+
 
 
