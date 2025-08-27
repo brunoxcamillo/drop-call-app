@@ -4,6 +4,7 @@ import { updateOrder } from "./orderService.js";
 import { orderStatusTypes } from "../utils/supabaseClient.js";
 import { formatMessage } from "../utils/messageFormatter.js";
 import { getMessageByType } from "./messageService.js";
+import { normalizePhone } from "../utils/normalizePhone.js";
 
 /* ===========================
    ENV + Cliente axios
@@ -30,12 +31,7 @@ export const zapi = axios.create({
 /* ===========================
    Helpers
 =========================== */
-function normalizePhone(phone) {
-  if (!phone) return null;
-  // Z-API costuma aceitar dígitos sem "+" em E.164
-  const digits = String(phone).replace(/\D/g, "");
-  return digits.length ? digits : null;
-}
+
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));

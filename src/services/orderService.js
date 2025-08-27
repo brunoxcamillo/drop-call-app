@@ -1,5 +1,6 @@
 // src/services/orderService.js
 import { supabase } from "../utils/supabaseClient.js";
+import { normalizePhone } from "../utils/normalizePhone.js";
 
 /** remove chaves com undefined (não toca em null) */
 function stripUndefined(obj) {
@@ -25,6 +26,7 @@ export async function upsertOrder(orderData, storeId) {
       // chaves de identidade
       shopify_id: orderData.id,        // precisa ser UNIQUE na tabela
       store_id: storeId,
+      admin_graphql_api_id: orderData.admin_graphql_api_id || null,
 
       // básicos
       order_number: orderData.order_number,
@@ -54,7 +56,7 @@ export async function upsertOrder(orderData, storeId) {
       customer_city: orderData.customer?.default_address?.city ?? null,
       customer_country: orderData.customer?.default_address?.country ?? null,
       customer_province_code: orderData.customer?.default_address?.province_code ?? null,
-      customer_phone: orderData.customer?.default_address?.phone ?? null,
+      customer_phone: normalizePhone(orderData.customer?.default_address?.phone) ?? null,
 
       // Billing address
       billing_city: orderData.billing_address?.city ?? null,

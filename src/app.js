@@ -1,6 +1,7 @@
 import express from "express";
 import routes from "./routes/index.js";
 
+
 const app = express();
 
 // 🔹 Parser global para o resto da aplicação
@@ -18,5 +19,7 @@ app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
+
+
 
 export default app;
