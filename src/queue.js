@@ -60,11 +60,11 @@ const worker = new Worker(
     async (job) => {
         console.log("⚙️ worker carregado!");
         const { type, payload } = job.data;
-
+        const order = await getOrderById(payload.orderId);
+        const store = await getStoreById(payload.storeId);
         // 1) Envio da confirmação inicial (mantido)
         if (type === "send_whatsapp_confirmation") {
-            const order = await getOrderById(payload.orderId);
-            const store = await getStoreById(payload.storeId);
+
             logger.info(`📲 enviando confirmação do pedido: ${order.shopify_id}`);
             await sendWhatsAppConfirmation(order, store);
             return { ok: true };
@@ -72,9 +72,7 @@ const worker = new Worker(
 
         // 2) Mensagens decididas pelo FSM (templates + vars)
         if (type === "send_dialog_messages") {
-            const { cc, orderId, messages, context } = payload;
-            const order = await getOrderById(orderId);
-
+            const { cc, orderId, messages, context, storeId } = payload;
             if (Array.isArray(messages)) {
                 for (const m of messages) {
                     if (m.type === "template") {
