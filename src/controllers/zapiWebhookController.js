@@ -5,18 +5,24 @@ import { getStoreById } from "../services/storeService.js";
 import { queue } from "../queue.js";
 import { loadOrCreateSession, saveSession, logEvent } from "../services/conversationService.js";
 import { reduce, States, Intents } from "../dialog/engine.js";
+import { intentByCountry } from "../utils/intentByCountry.js";
+import { toFormData } from "axios";
 
-
-function parseIntentNumbersOnly(text, state) {
+export async function parseIntentNumbersOnly(text, state, cc) {
     const t = (text || "").trim().toLowerCase();
 
     // normalizar somente dígitos
     const isDigitOnly = /^[0-9]+$/.test(t);
-
+    let intentBykeywords = Intents.UNKNOWN;
     if (state === States.AWAITING_CONFIRMATION || state === States.START) {
         // Passo 1 (menu magro): 1 confirmar, 2 mudar endereço
         if (t === "1") return Intents.CONFIRM;
         if (t === "2") return Intents.CHANGE_ADDRESS;
+        intentBykeywords = await intentByCountry(cc, t);
+        if (intentBykeywords == Intents.CONFIRM ||
+            intentBykeywords == Intents.CHANGE_ADDRESS) {
+            return intentBykeywords;
+        }
         return Intents.UNKNOWN; // qualquer outra coisa -> inválido
     }
 
@@ -32,6 +38,13 @@ function parseIntentNumbersOnly(text, state) {
         if (t === "1") return Intents.CONFIRM;
         if (t === "2") return Intents.GO_BACK;
         if (t === "3") return Intents.CANCEL_ADDR_CHANGE;
+        intentBykeywords = await intentByCountry(cc, t);
+        if (intentBykeywords == Intents.CONFIRM ||
+            intentBykeywords == Intents.GO_BACK ||
+            intentBykeywords == Intents.CANCEL_ADDR_CHANGE) {
+            return intentBykeywords;
+        }
+
         return Intents.UNKNOWN;
     }
 
@@ -64,7 +77,7 @@ export async function handleZapiWebhook(req, res) {
         });
 
         // 3) Determinar intenção
-        let intent = parseIntentNumbersOnly(message, session.state);
+        let intent = parseIntentNumbersOnly(message, session.state, cc);
 
         // 4) Rodar o motor de diálogo (FSM)
         const result = reduce(session, intent, message);
@@ -120,3 +133,7 @@ export async function handleZapiWebhook(req, res) {
         return res.status(200).send("ok"); // não force retry síncrono
     }
 }
+
+
+let testing = await intentByCountry("BR", "confirmar pedido")
+console.log(testing);
