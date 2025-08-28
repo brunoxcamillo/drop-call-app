@@ -13,7 +13,6 @@ import logger from "./utils/logger.js";
 import { getStoreById } from "./services/storeService.js";
 
 // ---------- Redis connection (TLS-ready, robust) ----------
-syncShopifyOrderTags({order_id: 84, store_id: 1});
 const REDIS_URL = process.env.REDIS_URL;
 if (!REDIS_URL) {
     throw new Error("Faltou REDIS_URL nas variáveis de ambiente.");
@@ -154,4 +153,3 @@ async function shutdown(name, code) {
 
 process.on("SIGTERM", () => shutdown("SIGTERM", 0));
 process.on("SIGINT", () => shutdown("SIGINT", 0));
-
