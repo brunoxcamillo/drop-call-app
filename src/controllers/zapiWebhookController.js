@@ -7,7 +7,7 @@ import { loadOrCreateSession, saveSession, logEvent } from "../services/conversa
 import { reduce, States, Intents } from "../dialog/engine.js";
 import { toFormData } from "axios";
 
-export async function parseIntentNumbersOnly(text, state, cc) {
+function parseIntentNumbersOnly(text, state, cc) {
     const t = (text || "").trim().toLowerCase();
 
     // normalizar somente dígitos
@@ -120,5 +120,6 @@ export async function handleZapiWebhook(req, res) {
         return res.status(200).send("ok"); // não force retry síncrono
     }
 }
+
 
 
