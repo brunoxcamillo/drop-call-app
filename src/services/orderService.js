@@ -33,8 +33,6 @@ export async function upsertOrder(orderData, storeId) {
       name: orderData.name,
       created_at: orderData.created_at,     // se preferir, grave em shopify_created_at
       cancelled_at: orderData.cancelled_at,
-      confirmed: orderData.confirmed ?? null,
-      financial_status: orderData.financial_status,
       tags: orderData.tags,
       source_name: orderData.source_name,
       currency: orderData.currency,
@@ -159,3 +157,4 @@ export async function getOrderByShopifyId(shopifyId, storeId) {
     throw err;
   }
 }
+
