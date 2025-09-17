@@ -34,11 +34,12 @@ export async function handleShopifyWebhook(req, res) {
                 await insertLineItems(order.id, payload.line_items);
 
                 logger.info(`✅ Pedido criado/atualizado: ${payload.id}`);
-
+                /*
                 await queue.add("send_whatsapp_confirmation", {
                     type: "send_whatsapp_confirmation",
                     payload: { orderId: order.id, storeId: store.id },
                 }, { jobId: `confirm:${order.id}` });
+                */
                 break;
 
 
@@ -62,6 +63,7 @@ export async function handleShopifyWebhook(req, res) {
         res.status(500).send("error");
     }
 }
+
 
 
 
